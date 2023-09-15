@@ -11,37 +11,45 @@
 <body>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
+        // Get the canvas element and its 2D rendering context
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Define the properties of the square object
         let square = {
-            x: 50,
-            y: 50,
-            width: 50,
-            height: 50,
-            speed: 5,
-            dx: 0,
-            dy: 0
+            x: 50,      // Initial x-coordinate
+            y: 50,      // Initial y-coordinate
+            width: 50,  // Width of the square
+            height: 50, // Height of the square
+            speed: 5,   // Movement speed
+            dx: 0,      // Horizontal movement delta
+            dy: 0       // Vertical movement delta
         };
 
+        // Function to draw the red square on the canvas
         function drawSquare() {
             ctx.fillStyle = 'red';
             ctx.fillRect(square.x, square.y, square.width, square.height);
         }
 
+        // Function to clear the entire canvas
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
+        // Function to update the position of the square
         function update() {
+            // Check if moving right or left is within canvas bounds
             if (square.x + square.width + square.dx <= canvas.width && square.x + square.dx >= 0) {
                 square.x += square.dx;
             }
+            // Check if moving up or down is within canvas bounds
             if (square.y + square.height + square.dy <= canvas.height && square.y + square.dy >= 0) {
                 square.y += square.dy;
             }
         }
 
+        // Function to handle the game loop
         function gameLoop() {
             clearCanvas();
             drawSquare();
@@ -49,35 +57,33 @@
             requestAnimationFrame(gameLoop);
         }
 
-
+        // Event listener for keydown events
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'ArrowRight') {
+            if (event.key === 'ArrowRight' || event.key === 'd') {
                 square.dx = square.speed;
-                square.dy = 0; // Reset vertical movement
             }
-            if (event.key === 'ArrowLeft') {
+            if (event.key === 'ArrowLeft' || event.key === 'a') {
                 square.dx = -square.speed;
-                square.dy = 0; // Reset vertical movement
             }
-            if (event.key === 'ArrowUp') {
+            if (event.key === 'ArrowUp' || event.key === 'w') {
                 square.dy = -square.speed;
-                square.dx = 0; // Reset horizontal movement
             }
-            if (event.key === 'ArrowDown') {
+            if (event.key === 'ArrowDown' || event.key === 's') {
                 square.dy = square.speed;
-                square.dx = 0; // Reset horizontal movement
             }
         });
 
+        // Event listener for keyup events
         document.addEventListener('keyup', (event) => {
-            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' || event.key === 'd' || event.key === 'a') {
                 square.dx = 0;
             }
-            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'w' || event.key === 's') {
                 square.dy = 0;
             }
         });
 
+        // Start the game loop
         gameLoop();
     </script>
 </body>
