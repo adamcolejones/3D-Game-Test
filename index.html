@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple 3D Plane with Camera</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+    <script src="path-to-gl-matrix/dist/gl-matrix-min.js"></script>
+
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the canvas element and its context
+            const canvas = document.getElementById('canvas');
+            const gl = canvas.getContext('webgl');
+
+            if (!gl) {
+                console.error('Unable to initialize WebGL. Your browser may not support it.');
+                return;
+            }
+
+            // Vertex shader program
+            const vsSource = `
+                attribute vec4 aVertexPosition;
+
+                uniform mat4 uModelViewMatrix;
+                uniform mat4 uProjectionMatrix;
+
+                void main(void) {
+                    gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+                }
+            `;
+
+            // Fragment shader program
+            const fsSource = `
+                precision mediump float;
+
+                void main(void) {
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+                }
+            `;
+
+            function compileShader(gl, source, type) {
+                const shader = gl.createShader(type);
+
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+
+                return shader;
+            }
+
+            const vertexShader = compileShader(gl, vsSource, gl.VERTEX_SHADER);
+            const fragmentShader = compileShader(gl, fsSource, gl.FRAGMENT_SHADER);
+
+            function createShaderProgram(gl, vertexShader, fragmentShader) {
+                const shaderProgram = gl.createProgram();
+
+                gl.attachShader(shaderProgram, vertexShader);
+                gl.attachShader(shaderProgram, fragmentShader);
+                gl.linkProgram(shaderProgram);
+
+                if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                    console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+                    return null;
+                }
+
+                return shaderProgram;
+            }
+
+            const shaderProgram = createShaderProgram(gl, vertexShader, fragmentShader);
+
+            // Define the geometry for a plane
+            const vertices = [
+                -1.0, -1.0, 0.0,
+                1.0, -1.0, 0.0,
+                -1.0, 1.0, 0.0,
+                1.0, 1.0, 0.0,
+            ];
+
+            const vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+            const positionAttribLocation = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
+
+            gl.vertexAttribPointer(positionAttribLocation, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(positionAttribLocation);
+
+            // Set up the view and projection matrices
+            const modelViewMatrix = mat4.create();
+            const projectionMatrix = mat4.create();
+
+            mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -5.0]);
+            mat4.perspective(projectionMatrix, Math.PI / 4, canvas.width / canvas.height, 0.1, 100.0);
+
+            // Set up uniforms
+            const uModelViewMatrix = gl.getUniformLocation(shaderProgram, 'uModelViewMatrix');
+            const uProjectionMatrix = gl.getUniformLocation(shaderProgram, 'uProjectionMatrix');
+
+            gl.useProgram(shaderProgram);
+
+            gl.uniformMatrix4fv(uModelViewMatrix, false, modelViewMatrix);
+            gl.uniformMatrix4fv(uProjectionMatrix, false, projectionMatrix);
+
+            // Clear the canvas
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            // Draw the plane
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        });
+    </script>
+</body>
+</html>

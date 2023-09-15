@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple 2D Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let square = {
+            x: 50,
+            y: 50,
+            width: 50,
+            height: 50,
+            speed: 5,
+            dx: 0,
+            dy: 0
+        };
+
+        function drawSquare() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(square.x, square.y, square.width, square.height);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function update() {
+            if (square.x + square.width + square.dx <= canvas.width && square.x + square.dx >= 0) {
+                square.x += square.dx;
+            }
+            if (square.y + square.height + square.dy <= canvas.height && square.y + square.dy >= 0) {
+                square.y += square.dy;
+            }
+        }
+
+        function gameLoop() {
+            clearCanvas();
+            drawSquare();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                square.dx = square.speed;
+                square.dy = 0; // Reset vertical movement
+            }
+            if (event.key === 'ArrowLeft') {
+                square.dx = -square.speed;
+                square.dy = 0; // Reset vertical movement
+            }
+            if (event.key === 'ArrowUp') {
+                square.dy = -square.speed;
+                square.dx = 0; // Reset horizontal movement
+            }
+            if (event.key === 'ArrowDown') {
+                square.dy = square.speed;
+                square.dx = 0; // Reset horizontal movement
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                square.dx = 0;
+            }
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                square.dy = 0;
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
