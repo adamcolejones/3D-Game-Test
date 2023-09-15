@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple 3D Game</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Include gl-matrix library -->
+    <script src="rotatingcube.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the canvas element and its WebGL context
+            const canvas = document.getElementById('gameCanvas');
+            const gl = canvas.getContext('webgl');
+
+            if (!gl) {
+                console.error('Unable to initialize WebGL. Your browser may not support it.');
+                return;
+            }
+
+            // Define vertex and fragment shader source code
+            const vertexShaderSource = `
+                attribute vec3 position;
+                uniform mat4 modelViewMatrix;
+                uniform mat4 projectionMatrix;
+                void main() {
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShaderSource = `
+                precision mediump float;
+                uniform vec4 faceColor;
+                void main() {
+                    gl_FragColor = faceColor;
+                }
+            `;
+
+            // Function to compile shaders
+            function compileShader(gl, source, type) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+            // Compile vertex and fragment shaders
+            const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
+            const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+            // Create shader program, attach shaders, and link program
+            const shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertexShader);
+            gl.attachShader(shaderProgram, fragmentShader);
+            gl.linkProgram(shaderProgram);
+
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+            }
+
+            gl.useProgram(shaderProgram);
+
+            // Get attribute and uniform locations
+            const positionAttributeLocation = gl.getAttribLocation(shaderProgram, 'position');
+            const modelViewMatrixUniformLocation = gl.getUniformLocation(shaderProgram, 'modelViewMatrix');
+            const projectionMatrixUniformLocation = gl.getUniformLocation(shaderProgram, 'projectionMatrix');
+            const faceColorUniformLocation = gl.getUniformLocation(shaderProgram, 'faceColor');
+
+            // Define positions and indices for the cube
+            const positions = [
+                // Front face
+                -1.0, -1.0,  1.0,
+                1.0, -1.0,  1.0,
+                1.0,  1.0,  1.0,
+                -1.0,  1.0,  1.0,
+
+                // Back face
+                -1.0, -1.0, -1.0,
+                1.0, -1.0, -1.0,
+                1.0,  1.0, -1.0,
+                -1.0,  1.0, -1.0,
+            ];
+
+            const indices = [
+                0,  1,  2,  0,  2,  3,  // Front face
+                4,  5,  6,  4,  6,  7,  // Back face
+                0,  3,  7,  0,  7,  4,  // Left face
+                1,  2,  6,  1,  6,  5,  // Right face
+                1,  0,  4,  1,  4,  5,  // Bottom face
+                2,  7,  3,  2,  6,  7   // Top face
+            ];
+
+            // Define colors for each face
+            const faceColors = [
+                [1.0, 0.0, 0.0, 1.0], // Red (Front face)
+                [0.0, 0.5, 1.0, 1.0], // Blue (Back face)
+                [1.0, 0.5, 0.0, 1.0], // Orange (Left face)
+                [1.0, 1.0, 0.0, 1.0], // Yellow (Right face)
+                [0.0, 0.0, 1.0, 1.0], // Green (Bottom face)
+                [0.5, 0.0, 1.0, 1.0]  // Purple (Top face)
+            ];
+
+            // Create buffer for positions and indices
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+            const indexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+            let rotationX = 0;
+            let rotationY = 0;
+
+            // Event listener for key presses to control rotation
+            document.addEventListener('keydown', (event) => {
+                switch(event.key) {
+                    case 'ArrowUp':
+                        rotationX += Math.PI / 90;
+                        break;
+                    case 'ArrowDown':
+                        rotationX -= Math.PI / 90;
+                        break;
+                    case 'ArrowLeft':
+                        rotationY += Math.PI / 90;
+                        break;
+                    case 'ArrowRight':
+                        rotationY -= Math.PI / 90;
+                        break;
+                }
+            });
+
+            // Function to draw the scene
+            function drawScene() {
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                gl.clearDepth(1.0); // Set the clear value for the depth buffer
+                gl.enable(gl.DEPTH_TEST); // Enable depth testing
+                gl.depthFunc(gl.LEQUAL); // Specify the comparison function for depth testing
+
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(positionAttributeLocation);
+
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+                // Set up projection matrix
+                const projectionMatrix = mat4.create();
+                const fieldOfView = Math.PI / 4;
+                const aspect = canvas.width / canvas.height;
+                const zNear = 0.01;
+                const zFar = 100.0;
+                mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+                // Set up model view matrix for translation and rotation
+                const modelViewMatrix = mat4.create();
+                mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -6.0]);
+                mat4.rotate(modelViewMatrix, modelViewMatrix, rotationX, [1, 0, 0]);
+                mat4.rotate(modelViewMatrix, modelViewMatrix, rotationY, [0, 1, 0]);
+
+                // Pass matrices and face color to shaders
+                gl.uniformMatrix4fv(modelViewMatrixUniformLocation, false, modelViewMatrix);
+                gl.uniformMatrix4fv(projectionMatrixUniformLocation, false, projectionMatrix);
+
+                // Draw each face with assigned color
+                for (let i = 0; i < indices.length; i += 6) {
+                    const faceColor = faceColors[i / 6]; // Assign a fixed color to each face
+                    gl.uniform4fv(faceColorUniformLocation, faceColor);
+
+                    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, i * 2);
+                }
+
+                // Request next frame for animation
+                requestAnimationFrame(drawScene);
+            }
+
+            // Initial call to draw the scene
+            drawScene();
+        });
+    </script>
+</body>
+</html>
