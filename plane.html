@@ -162,11 +162,26 @@
         function animate() {
             requestAnimationFrame(animate);
 
+            // Get the camera's direction vector
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+
+            // Get the camera's right vector (perpendicular to the direction vector)
+            const cameraRight = new THREE.Vector3();
+            cameraRight.crossVectors(camera.up, cameraDirection);
+
             // Move the cube
-            if (keyboard['KeyW']) cube.position.z -= 0.1;
-            if (keyboard['KeyS']) cube.position.z += 0.1;
-            if (keyboard['KeyA']) cube.position.x -= 0.1;
-            if (keyboard['KeyD']) cube.position.x += 0.1;
+            if (keyboard['KeyW']) cube.position.addScaledVector(cameraDirection, 0.1);
+            if (keyboard['KeyS']) cube.position.addScaledVector(cameraDirection, -0.1);
+            if (keyboard['KeyA']) cube.position.addScaledVector(cameraRight, 0.1);
+            if (keyboard['KeyD']) cube.position.addScaledVector(cameraRight, -0.1);
+
+
+            // Move the cube
+            // if (keyboard['KeyW']) cube.position.z -= 0.1;
+            // if (keyboard['KeyS']) cube.position.z += 0.1;
+            // if (keyboard['KeyA']) cube.position.x -= 0.1;
+            // if (keyboard['KeyD']) cube.position.x += 0.1;
 
             // Apply gravity
             if (cube.position.y > 0) {

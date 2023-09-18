@@ -12,21 +12,13 @@
     <script src="movingcube.js"></script>
     <!-- <script src="https://threejs.org/build/three.js"></script> -->
     <script>
-        // +X Right ->
-        // -X Left <-
-        // +Y Up ^
-        // -Y Down v
-        // +Z Forward
-        // -Z Backward
-
         // Create a scene
         const scene = new THREE.Scene();
 
         // Create a camera
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, -10, 10); // Set the camera above the scene
-        camera.lookAt(0, 0, 0); // Look at the front side of the white plane
-
+        camera.position.set(0, 5, 15);
+        // camera.lookAt(0, 0, 0); // Look at the front side of the white plane
 
         // Create a renderer
         const renderer = new THREE.WebGLRenderer();
@@ -37,6 +29,13 @@
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const cube = new THREE.Mesh(geometry, material);
+
+        // Get the dimensions of the cube
+        const cubeDimensions = geometry.parameters;
+
+        // Set the initial position of the cube
+        cube.position.set(0, -cubeDimensions.height / 2, 0); // Adjust y-coordinate
+
         scene.add(cube);
 
         // Add x-axis arrow (red)
@@ -56,6 +55,7 @@
         const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.rotation.x = Math.PI / 2;
+        plane.position.y = 0; // Set the position of the plane to y = 0
         scene.add(plane);
 
         // Add gravity and velocity properties to the cube
@@ -64,38 +64,70 @@
 
         // Handle user input
         const keyboard = {};
-        // Handle user input
+
         let cameraAngle = Math.PI / 2; // Set initial camera angle to 90 degrees (Math.PI/2 radians)
-        const cameraRotateSpeed = 0.02;
+        const cameraRotateSpeed = 0.2;
+        let cameraVerticalAngle = Math.PI / 4; // Set initial vertical camera angle (45 degrees)
+        const cameraVerticalRotateSpeed = 0.2;
+
 
         document.addEventListener('keydown', (event) => {
             keyboard[event.code] = true;
-
             if (event.code === 'ArrowLeft') {
                 cameraAngle += cameraRotateSpeed;
             }
             if (event.code === 'ArrowRight') {
                 cameraAngle -= cameraRotateSpeed;
             }
+            if (event.code === 'ArrowUp') {
+                cameraVerticalAngle += cameraVerticalRotateSpeed;
+                // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
+                cameraVerticalAngle = Math.min(Math.PI / 2 - 0.01, cameraVerticalAngle);
+            }
+            if (event.code === 'ArrowDown') {
+                cameraVerticalAngle -= cameraVerticalRotateSpeed;
+                // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
+                cameraVerticalAngle = Math.max(-Math.PI / 2 + 0.01, cameraVerticalAngle);
+            }
         });
-
-
 
         document.addEventListener('keyup', (event) => {
             keyboard[event.code] = false;
         });
 
-        
-
         // Render loop
         function animate() {
             requestAnimationFrame(animate);
 
+            // Get the camera's direction vector
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+
+            // Zero out the vertical component
+            cameraDirection.y = 0;
+            cameraDirection.normalize();
+
+            // Calculate camera right vector based on direction and world up
+            const cameraRight = new THREE.Vector3();
+            cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)).normalize();
+
+            // Ensure the camera stays oriented upwards
+            const upVector = new THREE.Vector3(0, 1, 0);
+            const dot = upVector.dot(cameraDirection);
+
+            // Lock the rotation if the camera is too close to being directly above or below
+            if (Math.abs(dot) > 0.99) {
+                camera.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2); // Lock the rotation
+                return;
+            } else {
+                camera.quaternion.set(0, 0, 0, 1); // Reset the rotation
+            }
+
             // Move the cube
-            if (keyboard['KeyW']) cube.position.z += 0.1;
-            if (keyboard['KeyS']) cube.position.z -= 0.1;
-            if (keyboard['KeyA']) cube.position.x -= 0.1;
-            if (keyboard['KeyD']) cube.position.x += 0.1;
+            if (keyboard['KeyW']) cube.position.addScaledVector(cameraDirection, 0.1);
+            if (keyboard['KeyS'] && cube.position.y - cubeDimensions.height / 2 <= 0) cube.position.addScaledVector(cameraDirection, -0.1);
+            if (keyboard['KeyA']) cube.position.addScaledVector(cameraRight, -0.1);
+            if (keyboard['KeyD']) cube.position.addScaledVector(cameraRight, 0.1);
 
             // Apply gravity
             if (cube.position.y > 0) {
@@ -105,19 +137,23 @@
                 cube.position.y = 0;
             }
 
-            cube.position.y += cube.velocityY;
-
             // Collision detection with the surface
-            if (cube.position.y < 0) {
-                cube.position.y = 0;
+            if (cube.position.y - cubeDimensions.height / 2 < 0) {
+                cube.position.y = cubeDimensions.height / 2;
             }
 
             // Update camera position to orbit around the cube
-            const radius = 15; // Adjust as needed
+            const radius = 15;
             const angle = cameraAngle;
-            const x = cube.position.x + radius * Math.cos(angle);
-            const z = cube.position.z + radius * Math.sin(angle);
-            const y = cube.position.y + 5; // Adjust the height above the cube
+            let verticalAngle = cameraVerticalAngle; // Change to let for modification
+
+            // Ensure verticalAngle stays within range
+            verticalAngle = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, verticalAngle));
+
+            const x = cube.position.x + radius * Math.cos(angle) * Math.cos(verticalAngle);
+            const z = cube.position.z + radius * Math.sin(angle) * Math.cos(verticalAngle);
+            const y = cube.position.y + radius * Math.sin(verticalAngle);
+
             camera.position.set(x, y, z);
             camera.lookAt(cube.position);
 
