@@ -10,33 +10,262 @@
 </head>
 <body>
     <script src="movingcube.js"></script>
+    <!-- <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script> -->
+    <!-- This script grants access to the FPS Counter -->
     <!-- <script src="https://threejs.org/build/three.js"></script> -->
     <script>
+        // TO DO LIST
+        // Create a JSON File that allows me to place blocks at certain x,y,z coordinates.  
+        // I should be able to edit these blocks in game as a dev to create the levels.
+        // I Want to create slopes, stairs, ground textures, fog, water, etc.  
+
+        // ############################################################################################################
         // Create a scene
         const scene = new THREE.Scene();
 
-        // Create a camera
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 15);
-        // camera.lookAt(0, 0, 0); // Look at the front side of the white plane
+        
 
         // Create a renderer
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
+        // ############################################################################################################
 
+        // ############################################################################################################     
+        //                                                 
+        //  ██████████████ ██████████████ ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██░░██████░░██ ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██         
+        //  ██░░██████████ ██░░██████░░██ ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██░░██████████ ██████████░░██ 
+        //  ██░░██         ██░░██                 ██░░██ 
+        //  ██░░██         ██░░██         ██████████░░██ 
+        //  ██░░██         ██░░██         ██░░░░░░░░░░██ 
+        //  ██████         ██████         ██████████████ 
+        //                                               
+        //                                                                                                                        
+        //  ██████████████ ██████████████ ██████  ██████ ██████          ██████ ██████████████ ██████████████  ████████████████   
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░██████████  ██░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██  ██░░░░░░░░░░░░██   
+        //  ██░░██████████ ██░░██████░░██ ██░░██  ██░░██ ██░░░░░░░░░░██  ██░░██ ██████░░██████ ██░░██████████  ██░░████████░░██   
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██ ██░░██████░░██  ██░░██     ██░░██     ██░░██          ██░░██    ██░░██  
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██  ██░░██     ██░░██     ██░░██████████  ██░░████████░░██   
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██  ██░░██     ██░░██     ██░░░░░░░░░░██  ██░░░░░░░░░░░░██ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██  ██░░██     ██░░██     ██░░██████████  ██░░██████░░████   
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██████░░██     ██░░██     ██░░██          ██░░██  ██░░██    
+        //  ██░░██████████ ██░░██████░░██ ██░░██████░░██ ██░░██  ██░░░░░░░░░░██     ██░░██     ██░░██████████  ██░░██  ██░░██████   
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██████████░░██     ██░░██     ██░░░░░░░░░░██  ██░░██  ██░░░░░░██ 
+        //  ██████████████ ██████████████ ██████████████ ██████          ██████     ██████     ██████████████  ██████  ██████████ 
+                                                                                                  
+        // Create a frame rate display
+        // const stats = new Stats();
+        // stats.showPanel(0); // 0: fps, 1: ms/frame, 2: memory
+        // stats.dom.style.position = 'absolute';
+        // stats.dom.style.top = '10px';
+        // stats.dom.style.right = '10px';
+        // document.body.appendChild(stats.dom);
+        // ############################################################################################################
+        //                                                                                            
+        //  ██████████████ ██████████████ ██████████████ ██████████████ ██████  ██████ ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██████░░██████ ██░░██████░░██ ██████░░██████ ██░░██  ██░░██ ██░░██████████ 
+        //  ██░░██             ██░░██     ██░░██  ██░░██     ██░░██     ██░░██  ██░░██ ██░░██         
+        //  ██░░██████████     ██░░██     ██░░██████░░██     ██░░██     ██░░██  ██░░██ ██░░██████████ 
+        //  ██░░░░░░░░░░██     ██░░██     ██░░░░░░░░░░██     ██░░██     ██░░██  ██░░██ ██░░░░░░░░░░██ 
+        //  ██████████░░██     ██░░██     ██░░██████░░██     ██░░██     ██░░██  ██░░██ ██████████░░██ 
+        //          ██░░██     ██░░██     ██░░██  ██░░██     ██░░██     ██░░██  ██░░██         ██░░██ 
+        //  ██████████░░██     ██░░██     ██░░██  ██░░██     ██░░██     ██░░██████░░██ ██████████░░██ 
+        //  ██░░░░░░░░░░██     ██░░██     ██░░██  ██░░██     ██░░██     ██░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██████████████     ██████     ██████  ██████     ██████     ██████████████ ██████████████ 
+        //                                                                                            
+        //                                                                              
+        //  ██████          ██████ ██████████████ ██████          ██████ ██████  ██████ 
+        //  ██░░██████████████░░██ ██░░░░░░░░░░██ ██░░██████████  ██░░██ ██░░██  ██░░██ 
+        //  ██░░░░░░░░░░░░░░░░░░██ ██░░██████████ ██░░░░░░░░░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██████░░██████░░██ ██░░██         ██░░██████░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██  ██░░██  ██░░██ ██░░██████████ ██░░██  ██░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██  ██░░██  ██░░██ ██░░░░░░░░░░██ ██░░██  ██░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██  ██████  ██░░██ ██░░██████████ ██░░██  ██░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██          ██░░██ ██░░██         ██░░██  ██░░██████░░██ ██░░██  ██░░██ 
+        //  ██░░██          ██░░██ ██░░██████████ ██░░██  ██░░░░░░░░░░██ ██░░██████░░██ 
+        //  ██░░██          ██░░██ ██░░░░░░░░░░██ ██░░██  ██████████░░██ ██░░░░░░░░░░██ 
+        //  ██████          ██████ ██████████████ ██████          ██████ ██████████████ 
+        //                                                                              
+        // Create a status display
+        const statusDiv = document.createElement('div');
+        statusDiv.id = 'status';
+        statusDiv.style.position = 'absolute';
+        statusDiv.style.top = '10px';
+        statusDiv.style.left = '10px';
+        statusDiv.style.color = 'white';
+        statusDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        statusDiv.style.padding = '5px';
+        statusDiv.style.borderRadius = '5px';
+        statusDiv.innerText = 'Jumping: No';
+        statusDiv.innerText += '\nCoordinates: (0, 0, 0)';
+        document.body.appendChild(statusDiv);
+
+
+        // ############################################################################################################
+        //
+        //  ██████████████ ██████  ████████ ████████  ████████ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░░░██ ██░░░░██  ██░░░░██ 
+        //  ██░░██████████ ██░░██  ██░░████ ████░░██  ██░░████ 
+        //  ██░░██         ██░░██  ██░░██     ██░░░░██░░░░██   
+        //  ██░░██████████ ██░░██████░░██     ████░░░░░░████   
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██       ████░░████     
+        //  ██████████░░██ ██░░██████░░██         ██░░██       
+        //          ██░░██ ██░░██  ██░░██         ██░░██       
+        //  ██████████░░██ ██░░██  ██░░████       ██░░██       
+        //  ██░░░░░░░░░░██ ██░░██  ██░░░░██       ██░░██       
+        //  ██████████████ ██████  ████████       ██████       
+        //                                                     
+        //                                                     
+        //  ██████████████   ██████████████ ████████  ████████ 
+        //  ██░░░░░░░░░░██   ██░░░░░░░░░░██ ██░░░░██  ██░░░░██ 
+        //  ██░░██████░░██   ██░░██████░░██ ████░░██  ██░░████ 
+        //  ██░░██  ██░░██   ██░░██  ██░░██   ██░░░░██░░░░██   
+        //  ██░░██████░░████ ██░░██  ██░░██   ████░░░░░░████   
+        //  ██░░░░░░░░░░░░██ ██░░██  ██░░██     ██░░░░░░██     
+        //  ██░░████████░░██ ██░░██  ██░░██   ████░░░░░░████   
+        //  ██░░██    ██░░██ ██░░██  ██░░██   ██░░░░██░░░░██   
+        //  ██░░████████░░██ ██░░██████░░██ ████░░██  ██░░████ 
+        //  ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░██  ██░░░░██ 
+        //  ████████████████ ██████████████ ████████  ████████ 
+        //                                                     
+        // Create a gradient plane below the scene (SKYBOX)
+        const gradientVertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const gradientFragmentShader = `
+            uniform vec3 topColor;
+            uniform vec3 bottomColor;
+            varying vec2 vUv;
+            void main() {
+                gl_FragColor = vec4(mix(bottomColor, topColor, vUv.y), 1.0);
+            }
+        `;
+
+        const gradientUniforms = {
+            topColor: { value: new THREE.Color(0x87CEEB) }, // Light blue color
+            bottomColor: { value: new THREE.Color(0xFFFFFF) } // White color
+        };
+
+        const planeGeometry = new THREE.PlaneGeometry(100, 100);
+        const planeMaterial = new THREE.ShaderMaterial({
+            vertexShader: gradientVertexShader,
+            fragmentShader: gradientFragmentShader,
+            uniforms: gradientUniforms,
+            side: THREE.DoubleSide
+        });
+
+        const gradientPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+        gradientPlane.rotation.x = -Math.PI / 2;
+        gradientPlane.position.y = -10; // Adjust y-coordinate to place it below the scene
+        scene.add(gradientPlane);
+
+        // ############################################################################################################
+
+        // ############################################################################################################
+        // s
+        //  ██████████████ ████████████████   ██████████████ ██████████████ ██████████████ ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██░░████████░░██   ██░░██████████ ██░░██████░░██ ██████░░██████ ██░░██████████ 
+        //  ██░░██         ██░░██    ██░░██   ██░░██         ██░░██  ██░░██     ██░░██     ██░░██         
+        //  ██░░██         ██░░████████░░██   ██░░██████████ ██░░██████░░██     ██░░██     ██░░██████████ 
+        //  ██░░██         ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ ██░░░░░░░░░░██     ██░░██     ██░░░░░░░░░░██ 
+        //  ██░░██         ██░░██████░░████   ██░░██████████ ██░░██████░░██     ██░░██     ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██     ██░░██         ██░░██  ██░░██     ██░░██     ██░░██         
+        //  ██░░██████████ ██░░██  ██░░██████ ██░░██████████ ██░░██  ██░░██     ██░░██     ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██░░██     ██░░██     ██░░░░░░░░░░██ 
+        //  ██████████████ ██████  ██████████ ██████████████ ██████  ██████     ██████     ██████████████ 
+        //                                                                                                
+        //                                                                
+        //  ██████████████ ██████  ██████ ██████████████   ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░░░░░░░░░██   ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██░░██  ██░░██ ██░░██████░░██   ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██   ██░░██         
+        //  ██░░██         ██░░██  ██░░██ ██░░██████░░████ ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██         ██░░██  ██░░██ ██░░████████░░██ ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██    ██░░██ ██░░██         
+        //  ██░░██████████ ██░░██████░░██ ██░░████████░░██ ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██████████████ ██████████████ ████████████████ ██████████████ 
+        //                                                                
         // Create a cube
         const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const cube = new THREE.Mesh(geometry, material);
+        const cubeMaterials = [
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Right face
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Left face
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Top face
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Bottom face
+            new THREE.MeshBasicMaterial({ color: 0x0000ff }), // Front face (positive z direction)
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })  // Back face
+        ];
+        const cube = new THREE.Mesh(geometry, cubeMaterials);
+
+        // Create an arrow helper to point out of the blue face (front face)
+        const arrowDirection = new THREE.Vector3(0, 0, 1); // Direction along the positive z-axis
+        const arrowOrigin = new THREE.Vector3(0, 0, 0); // Origin at the center of the cube
+        const arrowLength = 2; // Length of the arrow
+        const arrowColor = 0xff0000; // Red color for the arrow
+        const arrowHeadLength = 0.5; // Length of the arrow head
+        const arrowHeadWidth = 0.2; // Width of the arrow head
+        const arrowHelper = new THREE.ArrowHelper(arrowDirection, arrowOrigin, arrowLength, arrowColor, arrowHeadLength, arrowHeadWidth);
+
+        // Add the arrow to the cube
+        cube.add(arrowHelper);
 
         // Get the dimensions of the cube
         const cubeDimensions = geometry.parameters;
 
         // Set the initial position of the cube
-        cube.position.set(0, -cubeDimensions.height / 2, 0); // Adjust y-coordinate
-
+        cube.position.set(0, 0, 0); // Adjust y-coordinate
         scene.add(cube);
+    
+        // Add gravity and velocity properties to the cube
+        cube.velocityY = 0;
+        cube.position.y = 0;
+
+        // Add jumping properties to the cube
+        cube.isJumping = false;
+        cube.jumpStrength = 0.2;
+        // ############################################################################################################
+
+        // ############################################################################################################     
+        //                                                                                               
+        //  ██████████████ ██████████████ ████████████████   ████████████   ██████████ ██████          ██████ ██████████████ ██████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░████ ██░░░░░░██ ██░░██████████  ██░░██ ██░░░░░░░░░░██ ██░░██   
+        //  ██░░██████████ ██░░██████░░██ ██░░████████░░██   ██░░████░░░░██ ████░░████ ██░░░░░░░░░░██  ██░░██ ██░░██████░░██ ██░░██     
+        //  ██░░██         ██░░██  ██░░██ ██░░██    ██░░██   ██░░██  ██░░██   ██░░██   ██░░██████░░██  ██░░██ ██░░██  ██░░██ ██░░██   
+        //  ██░░██         ██░░██████░░██ ██░░████████░░██   ██░░██  ██░░██   ██░░██   ██░░██  ██░░██  ██░░██ ██░░██████░░██ ██░░██        
+        //  ██░░██         ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░██  ██░░██   ██░░██   ██░░██  ██░░██  ██░░██ ██░░░░░░░░░░██ ██░░██      
+        //  ██░░██         ██░░██████░░██ ██░░██████░░████   ██░░██  ██░░██   ██░░██   ██░░██  ██░░██  ██░░██ ██░░██████░░██ ██░░██      
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██     ██░░██  ██░░██   ██░░██   ██░░██  ██░░██████░░██ ██░░██  ██░░██ ██░░██      
+        //  ██░░██████████ ██░░██  ██░░██ ██░░██  ██░░██████ ██░░████░░░░██ ████░░████ ██░░██  ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░██  ██░░░░░░██ ██░░░░░░░░████ ██░░░░░░██ ██░░██  ██████████░░██ ██░░██  ██░░██ ██░░░░░░░░░░██ 
+        //  ██████████████ ██████  ██████ ██████  ██████████ ████████████   ██████████ ██████          ██████ ██████  ██████ ██████████████ 
+        //                                                                                                    
+        //                                                                                                            
+        //  ██████████████ ████████████████   ████████████████   ██████████████ ██████          ██████ ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ ██░░██          ██░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████░░██ ██░░████████░░██   ██░░████████░░██   ██░░██████░░██ ██░░██          ██░░██ ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░██    ██░░██   ██░░██    ██░░██   ██░░██  ██░░██ ██░░██          ██░░██ ██░░██         
+        //  ██░░██████░░██ ██░░████████░░██   ██░░████████░░██   ██░░██  ██░░██ ██░░██  ██████  ██░░██ ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░░░░░██   ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████░░██ ██░░██████░░████   ██░░██████░░████   ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ ██████████░░██ 
+        //  ██░░██  ██░░██ ██░░██  ██░░██     ██░░██  ██░░██     ██░░██  ██░░██ ██░░██████░░██████░░██         ██░░██ 
+        //  ██░░██  ██░░██ ██░░██  ██░░██████ ██░░██  ██░░██████ ██░░██████░░██ ██░░░░░░░░░░░░░░░░░░██ ██████████░░██ 
+        //  ██░░██  ██░░██ ██░░██  ██░░░░░░██ ██░░██  ██░░░░░░██ ██░░░░░░░░░░██ ██░░██████░░██████░░██ ██░░░░░░░░░░██ 
+        //  ██████  ██████ ██████  ██████████ ██████  ██████████ ██████████████ ██████  ██████  ██████ ██████████████ 
+        //                                                                                                            
 
         // Add x-axis arrow (red)
         const xAxis = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 2, 0xff0000); // x-axis (red)
@@ -50,18 +279,105 @@
         const zAxis = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 2, 0x00ff00); // z-axis (green)
         scene.add(zAxis);
 
-        // Create a plane (the surface)
-        const planeGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
-        const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = Math.PI / 2;
-        plane.position.y = 0; // Set the position of the plane to y = 0
-        scene.add(plane);
+        // ############################################################################################################
 
-        // Add gravity and velocity properties to the cube
-        cube.velocityY = 0;
-        cube.position.y = 0;
+        // ############################################################################################################
+        //
+        //  ██████████████ ████████████████   ██████████████ ██████  ██████ ██████          ██████ ████████████   
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░██████████  ██░░██ ██░░░░░░░░████ 
+        //  ██░░██████████ ██░░████████░░██   ██░░██████░░██ ██░░██  ██░░██ ██░░░░░░░░░░██  ██░░██ ██░░████░░░░██ 
+        //  ██░░██         ██░░██    ██░░██   ██░░██  ██░░██ ██░░██  ██░░██ ██░░██████░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██         ██░░████████░░██   ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██  ██████ ██░░░░░░░░░░░░██   ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██  ██░░██ ██░░██████░░████   ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ ██░░██  ██░░██ 
+        //  ██░░██  ██░░██ ██░░██  ██░░██     ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██████░░██ ██░░██  ██░░██ 
+        //  ██░░██████░░██ ██░░██  ██░░██████ ██░░██████░░██ ██░░██████░░██ ██░░██  ██░░░░░░░░░░██ ██░░████░░░░██ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██████████░░██ ██░░░░░░░░████ 
+        //  ██████████████ ██████  ██████████ ██████████████ ██████████████ ██████          ██████ ████████████   
+        //                                                                                                        
+        //                                                                                                
+        //  ██████████████   ██████         ██████████████ ██████████████ ██████  ████████ ██████████████ 
+        //  ██░░░░░░░░░░██   ██░░██         ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████░░██   ██░░██         ██░░██████░░██ ██░░██████████ ██░░██  ██░░████ ██░░██████████ 
+        //  ██░░██  ██░░██   ██░░██         ██░░██  ██░░██ ██░░██         ██░░██  ██░░██   ██░░██         
+        //  ██░░██████░░████ ██░░██         ██░░██  ██░░██ ██░░██         ██░░██████░░██   ██░░██████████ 
+        //  ██░░░░░░░░░░░░██ ██░░██         ██░░██  ██░░██ ██░░██         ██░░░░░░░░░░██   ██░░░░░░░░░░██ 
+        //  ██░░████████░░██ ██░░██         ██░░██  ██░░██ ██░░██         ██░░██████░░██   ██████████░░██ 
+        //  ██░░██    ██░░██ ██░░██         ██░░██  ██░░██ ██░░██         ██░░██  ██░░██           ██░░██ 
+        //  ██░░████████░░██ ██░░██████████ ██░░██████░░██ ██░░██████████ ██░░██  ██░░████ ██████████░░██ 
+        //  ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██░░░░██ ██░░░░░░░░░░██ 
+        //  ████████████████ ██████████████ ██████████████ ██████████████ ██████  ████████ ██████████████ 
+        //                                                                                                
 
+        // Function to create a checkerboard
+        function createCheckerboard(offsetX = 0, offsetY = 0, offsetZ = 0) {
+            const cubeSize = 1; // size of each cube
+            const boardSize = 20; // number of cubes along one axis
+            const colors = [0xff0000, 0xffa500, 0xffff00, 0x008000, 0x0000ff, 0x800080]; // red, orange, yellow, green, blue, purple
+
+            for (let i = 0; i < boardSize; i++) {
+                for (let j = 0; j < boardSize; j++) {
+                    let color;
+                    if ((i + j) % 2 === 0) {
+                        const colorIndex = ((i / 2) + (j / 2)) % colors.length;
+                        color = colors[colorIndex];
+                    } else {
+                        color = 0xffffff; // white
+                    }
+
+                    const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+                    // Create a material array to only show the faces that are not connected
+                    const materials = [
+                        new THREE.MeshBasicMaterial({ color: color }), // Right face
+                        new THREE.MeshBasicMaterial({ color: color }), // Left face
+                        new THREE.MeshBasicMaterial({ color: color }), // Top face
+                        new THREE.MeshBasicMaterial({ color: color }), // Bottom face
+                        new THREE.MeshBasicMaterial({ color: color }), // Front face
+                        new THREE.MeshBasicMaterial({ color: color })  // Back face
+                    ];
+
+                    // Adjust which faces to show
+                    if (i > 0) materials[1] = new THREE.MeshBasicMaterial({ visible: false }); // Hide left face if there is a cube to the left
+                    if (i < boardSize - 1) materials[0] = new THREE.MeshBasicMaterial({ visible: false }); // Hide right face if there is a cube to the right
+                    if (j > 0) materials[5] = new THREE.MeshBasicMaterial({ visible: false }); // Hide back face if there is a cube behind
+                    if (j < boardSize - 1) materials[4] = new THREE.MeshBasicMaterial({ visible: false }); // Hide front face if there is a cube in front
+
+                    const block = new THREE.Mesh(geometry, materials);
+                    block.position.set(i - boardSize / 2 + offsetX, offsetY, j - boardSize / 2 + offsetZ);
+                    scene.add(block);
+                }
+            }
+        }
+
+        // Create the first checkerboard
+        createCheckerboard(0, -1, 0);
+
+        // Create the second checkerboard next to the original and 1 block higher
+        createCheckerboard(0, 0, -20);
+        createCheckerboard(0, 2, -40);
+
+        // ############################################################################################################
+
+        // ############################################################################################################
+        //
+        //  ██████████████ ██████████████ ██████          ██████ ██████████████ ████████████████   ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██████████████░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██░░██████░░██ ██░░░░░░░░░░░░░░░░░░██ ██░░██████████ ██░░████████░░██   ██░░██████░░██ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██████░░██████░░██ ██░░██         ██░░██    ██░░██   ██░░██  ██░░██ 
+        //  ██░░██         ██░░██████░░██ ██░░██  ██░░██  ██░░██ ██░░██████████ ██░░████████░░██   ██░░██████░░██ 
+        //  ██░░██         ██░░░░░░░░░░██ ██░░██  ██░░██  ██░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ 
+        //  ██░░██         ██░░██████░░██ ██░░██  ██████  ██░░██ ██░░██████████ ██░░██████░░████   ██░░██████░░██ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██          ██░░██ ██░░██         ██░░██  ██░░██     ██░░██  ██░░██ 
+        //  ██░░██████████ ██░░██  ██░░██ ██░░██          ██░░██ ██░░██████████ ██░░██  ██░░██████ ██░░██  ██░░██ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░██          ██░░██ ██░░░░░░░░░░██ ██░░██  ██░░░░░░██ ██░░██  ██░░██ 
+        //  ██████████████ ██████  ██████ ██████          ██████ ██████████████ ██████  ██████████ ██████  ██████ 
+        //                 
+        
+        // Create a camera
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 15);
+        // camera.lookAt(0, 0, 0); // Look at the front side of the white plane
         // Handle user input
         const keyboard = {};
 
@@ -69,7 +385,6 @@
         const cameraRotateSpeed = 0.2;
         let cameraVerticalAngle = Math.PI / 4; // Set initial vertical camera angle (45 degrees)
         const cameraVerticalRotateSpeed = 0.2;
-
 
         document.addEventListener('keydown', (event) => {
             keyboard[event.code] = true;
@@ -79,25 +394,112 @@
             if (event.code === 'ArrowRight') {
                 cameraAngle -= cameraRotateSpeed;
             }
-            if (event.code === 'ArrowUp') {
-                cameraVerticalAngle += cameraVerticalRotateSpeed;
-                // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
-                cameraVerticalAngle = Math.min(Math.PI / 2 - 0.01, cameraVerticalAngle);
+            if (event.code === 'Space' && !cube.isJumping) {
+                cube.velocityY = cube.jumpStrength;
+                cube.isJumping = true;
             }
-            if (event.code === 'ArrowDown') {
-                cameraVerticalAngle -= cameraVerticalRotateSpeed;
-                // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
-                cameraVerticalAngle = Math.max(-Math.PI / 2 + 0.01, cameraVerticalAngle);
-            }
+            // if (event.code === 'ArrowUp') {
+            //     cameraVerticalAngle += cameraVerticalRotateSpeed;
+            //     // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
+            //     cameraVerticalAngle = Math.min(Math.PI / 2 - 0.01, cameraVerticalAngle);
+            // }
+            // if (event.code === 'ArrowDown') {
+            //     cameraVerticalAngle -= cameraVerticalRotateSpeed;
+            //     // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
+            //     cameraVerticalAngle = Math.max(-Math.PI / 2 + 0.01, cameraVerticalAngle);
+            // }
         });
 
+        // If user picks up a key, then correct the amount of pressed inputs
         document.addEventListener('keyup', (event) => {
             keyboard[event.code] = false;
         });
 
+        // ############################################################################################################
+
+        // ############################################################################################################    
+        //                                                                          
+        //  ██████  ██████ ██████████████ ████████████   ██████████████ ██████████████ ██████████████ 
+        //  ██░░██  ██░░██ ██░░░░░░░░░░██ ██░░░░░░░░████ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██  ██░░██ ██░░██████░░██ ██░░████░░░░██ ██░░██████░░██ ██████░░██████ ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██ ██░░██  ██░░██     ██░░██     ██░░██         
+        //  ██░░██  ██░░██ ██░░██████░░██ ██░░██  ██░░██ ██░░██████░░██     ██░░██     ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░░░░░░░░░██     ██░░██     ██░░░░░░░░░░██ 
+        //  ██░░██  ██░░██ ██░░██████████ ██░░██  ██░░██ ██░░██████░░██     ██░░██     ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░██         ██░░██  ██░░██ ██░░██  ██░░██     ██░░██     ██░░██         
+        //  ██░░██████░░██ ██░░██         ██░░████░░░░██ ██░░██  ██░░██     ██░░██     ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░██         ██░░░░░░░░████ ██░░██  ██░░██     ██░░██     ██░░░░░░░░░░██ 
+        //  ██████████████ ██████         ████████████   ██████  ██████     ██████     ██████████████ 
+        //                                                                                            
+        //                                                                
+        //  ██████████████ ██████  ██████ ██████████████   ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░██ ██░░░░░░░░░░██   ██░░░░░░░░░░██ 
+        //  ██░░██████████ ██░░██  ██░░██ ██░░██████░░██   ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██  ██░░██   ██░░██         
+        //  ██░░██         ██░░██  ██░░██ ██░░██████░░████ ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██         ██░░██  ██░░██ ██░░████████░░██ ██░░██████████ 
+        //  ██░░██         ██░░██  ██░░██ ██░░██    ██░░██ ██░░██         
+        //  ██░░██████████ ██░░██████░░██ ██░░████████░░██ ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██████████████ ██████████████ ████████████████ ██████████████ 
+        //                                                                
+        //                                                                                 
+        //  ████████████████   ██████████████ ██████████████ ██████████████ ██████████████ ██████████ ██████████████ ██████          ██████ 
+        //  ██░░░░░░░░░░░░██   ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░██ ██░░░░░░░░░░██ ██░░██████████  ██░░██ 
+        //  ██░░████████░░██   ██░░██████░░██ ██████░░██████ ██░░██████░░██ ██████░░██████ ████░░████ ██░░██████░░██ ██░░░░░░░░░░██  ██░░██ 
+        //  ██░░██    ██░░██   ██░░██  ██░░██     ██░░██     ██░░██  ██░░██     ██░░██       ██░░██   ██░░██  ██░░██ ██░░██████░░██  ██░░██ 
+        //  ██░░████████░░██   ██░░██  ██░░██     ██░░██     ██░░██████░░██     ██░░██       ██░░██   ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ 
+        //  ██░░░░░░░░░░░░██   ██░░██  ██░░██     ██░░██     ██░░░░░░░░░░██     ██░░██       ██░░██   ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ 
+        //  ██░░██████░░████   ██░░██  ██░░██     ██░░██     ██░░██████░░██     ██░░██       ██░░██   ██░░██  ██░░██ ██░░██  ██░░██  ██░░██ 
+        //  ██░░██  ██░░██     ██░░██  ██░░██     ██░░██     ██░░██  ██░░██     ██░░██       ██░░██   ██░░██  ██░░██ ██░░██  ██░░██████░░██ 
+        //  ██░░██  ██░░██████ ██░░██████░░██     ██░░██     ██░░██  ██░░██     ██░░██     ████░░████ ██░░██████░░██ ██░░██  ██░░░░░░░░░░██ 
+        //  ██░░██  ██░░░░░░██ ██░░░░░░░░░░██     ██░░██     ██░░██  ██░░██     ██░░██     ██░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██████████░░██ 
+        //  ██████  ██████████ ██████████████     ██████     ██████  ██████     ██████     ██████████ ██████████████ ██████          ██████ 
+        //                   
+        function updateCubeRotation() {
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+            cameraDirection.y = 0; // Ignore vertical component
+            cameraDirection.normalize();
+
+            let moveDirection = new THREE.Vector3();
+
+            if (keyboard['KeyW']) moveDirection.add(cameraDirection);
+            if (keyboard['KeyS']) moveDirection.addScaledVector(cameraDirection, -1);
+
+            const cameraRight = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), cameraDirection).normalize();
+            if (keyboard['KeyA']) moveDirection.add(cameraRight);
+            if (keyboard['KeyD']) moveDirection.addScaledVector(cameraRight, -1);
+
+            if (moveDirection.length() > 0) {
+                moveDirection.normalize();
+                const angle = Math.atan2(moveDirection.x, moveDirection.z);
+                cube.rotation.set(0, angle, 0);
+            }
+        }
+        // ############################################################################################################
+
+        // ############################################################################################################       
+        //                                                                                                                       
+        //  ██████████████ ██████          ██████ ██████████ ██████          ██████ ██████████████ ██████████████ ██████████████ 
+        //  ██░░░░░░░░░░██ ██░░██████████  ██░░██ ██░░░░░░██ ██░░██████████████░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ 
+        //  ██░░██████░░██ ██░░░░░░░░░░██  ██░░██ ████░░████ ██░░░░░░░░░░░░░░░░░░██ ██░░██████░░██ ██████░░██████ ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░██████░░██  ██░░██   ██░░██   ██░░██████░░██████░░██ ██░░██  ██░░██     ██░░██     ██░░██         
+        //  ██░░██████░░██ ██░░██  ██░░██  ██░░██   ██░░██   ██░░██  ██░░██  ██░░██ ██░░██████░░██     ██░░██     ██░░██████████ 
+        //  ██░░░░░░░░░░██ ██░░██  ██░░██  ██░░██   ██░░██   ██░░██  ██░░██  ██░░██ ██░░░░░░░░░░██     ██░░██     ██░░░░░░░░░░██ 
+        //  ██░░██████░░██ ██░░██  ██░░██  ██░░██   ██░░██   ██░░██  ██████  ██░░██ ██░░██████░░██     ██░░██     ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░██  ██░░██████░░██   ██░░██   ██░░██          ██░░██ ██░░██  ██░░██     ██░░██     ██░░██         
+        //  ██░░██  ██░░██ ██░░██  ██░░░░░░░░░░██ ████░░████ ██░░██          ██░░██ ██░░██  ██░░██     ██░░██     ██░░██████████ 
+        //  ██░░██  ██░░██ ██░░██  ██████████░░██ ██░░░░░░██ ██░░██          ██░░██ ██░░██  ██░░██     ██░░██     ██░░░░░░░░░░██ 
+        //  ██████  ██████ ██████          ██████ ██████████ ██████          ██████ ██████  ██████     ██████     ██████████████ 
+        //                                                                                                                       
         // Render loop
+        // Update the animate function to include camera angle changes
         function animate() {
             requestAnimationFrame(animate);
+            // THIS IS FOR THE FPS COUNTER
+            // stats.begin();
 
             // Get the camera's direction vector
             const cameraDirection = new THREE.Vector3();
@@ -111,6 +513,19 @@
             const cameraRight = new THREE.Vector3();
             cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)).normalize();
 
+            // Move the cube
+            if (keyboard['KeyW']) cube.position.addScaledVector(cameraDirection, 0.1);
+            if (keyboard['KeyS']) cube.position.addScaledVector(cameraDirection, -0.1);
+            if (keyboard['KeyA']) cube.position.addScaledVector(cameraRight, -0.1);
+            if (keyboard['KeyD']) cube.position.addScaledVector(cameraRight, 0.1);
+            
+            // Update the status display
+            statusDiv.innerText = `Jumping: ${cube.isJumping ? 'Yes' : 'No'}`;
+            statusDiv.innerText += `\nCoordinates: (${cube.position.x.toFixed(2)}, ${cube.position.y.toFixed(2)}, ${cube.position.z.toFixed(2)})`;    
+
+            // Update cube rotation
+            updateCubeRotation();
+
             // Ensure the camera stays oriented upwards
             const upVector = new THREE.Vector3(0, 1, 0);
             const dot = upVector.dot(cameraDirection);
@@ -123,24 +538,54 @@
                 camera.quaternion.set(0, 0, 0, 1); // Reset the rotation
             }
 
-            // Move the cube
-            if (keyboard['KeyW']) cube.position.addScaledVector(cameraDirection, 0.1);
-            if (keyboard['KeyS'] && cube.position.y - cubeDimensions.height / 2 <= 0) cube.position.addScaledVector(cameraDirection, -0.1);
-            if (keyboard['KeyA']) cube.position.addScaledVector(cameraRight, -0.1);
-            if (keyboard['KeyD']) cube.position.addScaledVector(cameraRight, 0.1);
-
+            // ############################################################################################################       
+            // Jumping
             // Apply gravity
             if (cube.position.y > 0) {
                 cube.velocityY -= 0.01;
-            } else {
-                cube.velocityY = 0;
-                cube.position.y = 0;
-            }
+            } 
+            // else {
+            //     cube.velocityY = 0;
+            //     cube.position.y = 0;
+            //     cube.isJumping = false; // Reset jumping state when on the ground
+            // }
 
-            // Collision detection with the surface
-            if (cube.position.y - cubeDimensions.height / 2 < 0) {
-                cube.position.y = cubeDimensions.height / 2;
+            // Apply vertical velocity to simulate jumping and falling
+            cube.position.y += cube.velocityY;
+
+
+            // Collision detection with the blocks
+            let isOnBlock = false;
+            scene.traverse(function(object) {
+                if (object.isMesh && object.geometry instanceof THREE.BoxGeometry && object !== cube) {
+                    const cubeBox = new THREE.Box3().setFromObject(cube);
+                    const objectBox = new THREE.Box3().setFromObject(object);
+
+                    if (cubeBox.intersectsBox(objectBox)) {
+                        const objectTop = objectBox.max.y;
+                        if (cube.position.y <= objectTop) {
+                            cube.position.y = objectTop;
+                            cube.velocityY = 0; // Ensure velocity is reset when hitting a block
+                            cube.isJumping = false; // Ensure jumping state is reset
+                            isOnBlock = true;
+                        }
+                    }
+                }
+            });
+
+
+
+            // If the cube is not on any block, continue falling
+            if (!isOnBlock) {
+                cube.velocityY -= 0.01; // Continue falling
             }
+            // Collision detection with the surface
+            // if (cube.position.y <= 0) {
+            //     cube.position.y = 0;
+            //     cube.velocityY = 0; // Ensure velocity is reset when hitting the ground
+            //     cube.isJumping = false; // Ensure jumping state is reset
+            // }
+            // ############################################################################################################       
 
             // Update camera position to orbit around the cube
             const radius = 15;
@@ -157,10 +602,17 @@
             camera.position.set(x, y, z);
             camera.lookAt(cube.position);
 
+            // THIS IS FOR THE FPS COUNTER
+            // stats.end();
+
             renderer.render(scene, camera);
         }
 
+        // ############################################################################################################
+
         animate();
+
+
     </script>
 
 </body>
