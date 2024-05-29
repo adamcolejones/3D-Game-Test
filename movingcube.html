@@ -103,7 +103,9 @@
         statusDiv.style.padding = '5px';
         statusDiv.style.borderRadius = '5px';
         statusDiv.innerText = 'Jumping: No';
+        statusDiv.innerText += '\nOn Block: No';
         statusDiv.innerText += '\nCoordinates: (0, 0, 0)';
+        statusDiv.innerText += `\nVelocity: (x, y, z)`;
         document.body.appendChild(statusDiv);
 
 
@@ -157,7 +159,7 @@
             bottomColor: { value: new THREE.Color(0xFFFFFF) } // White color
         };
 
-        const planeGeometry = new THREE.PlaneGeometry(100, 100);
+        const planeGeometry = new THREE.PlaneGeometry(200, 200);
         const planeMaterial = new THREE.ShaderMaterial({
             vertexShader: gradientVertexShader,
             fragmentShader: gradientFragmentShader,
@@ -212,31 +214,41 @@
         const cube = new THREE.Mesh(geometry, cubeMaterials);
 
         // Create an arrow helper to point out of the blue face (front face)
-        const arrowDirection = new THREE.Vector3(0, 0, 1); // Direction along the positive z-axis
-        const arrowOrigin = new THREE.Vector3(0, 0, 0); // Origin at the center of the cube
-        const arrowLength = 2; // Length of the arrow
-        const arrowColor = 0xff0000; // Red color for the arrow
-        const arrowHeadLength = 0.5; // Length of the arrow head
-        const arrowHeadWidth = 0.2; // Width of the arrow head
-        const arrowHelper = new THREE.ArrowHelper(arrowDirection, arrowOrigin, arrowLength, arrowColor, arrowHeadLength, arrowHeadWidth);
+        // const arrowDirection = new THREE.Vector3(0, 0, 1); // Direction along the positive z-axis
+        // const arrowOrigin = new THREE.Vector3(0, 0, 0); // Origin at the center of the cube
+        // const arrowLength = 2; // Length of the arrow
+        // const arrowColor = 0xff0000; // Red color for the arrow
+        // const arrowHeadLength = 0.5; // Length of the arrow head
+        // const arrowHeadWidth = 0.2; // Width of the arrow head
+        // const arrowHelper = new THREE.ArrowHelper(arrowDirection, arrowOrigin, arrowLength, arrowColor, arrowHeadLength, arrowHeadWidth);
 
-        // Add the arrow to the cube
-        cube.add(arrowHelper);
+        // // Add the arrow to the cube
+        // cube.add(arrowHelper);
 
         // Get the dimensions of the cube
         const cubeDimensions = geometry.parameters;
 
         // Set the initial position of the cube
-        cube.position.set(0, 0, 0); // Adjust y-coordinate
+        cube.position.set(0, cubeDimensions.height / 2, 0); // Adjust y-coordinate
         scene.add(cube);
     
         // Add gravity and velocity properties to the cube
+        cube.velocityX = 0;
         cube.velocityY = 0;
+        cube.velocityZ = 0;
+
         cube.position.y = 0;
 
         // Add jumping properties to the cube
         cube.isJumping = false;
         cube.jumpStrength = 0.2;
+
+        let canMoveNorth = true;
+        let canMoveSouth = true;
+        let canMoveEast = true;
+        let canMoveWest = true;
+
+
         // ############################################################################################################
 
         // ############################################################################################################     
@@ -265,7 +277,17 @@
         //  ██░░██  ██░░██ ██░░██  ██░░██████ ██░░██  ██░░██████ ██░░██████░░██ ██░░░░░░░░░░░░░░░░░░██ ██████████░░██ 
         //  ██░░██  ██░░██ ██░░██  ██░░░░░░██ ██░░██  ██░░░░░░██ ██░░░░░░░░░░██ ██░░██████░░██████░░██ ██░░░░░░░░░░██ 
         //  ██████  ██████ ██████  ██████████ ██████  ██████████ ██████████████ ██████  ██████  ██████ ██████████████ 
-        //                                                                                                            
+        //          
+        // Up = + Y 
+        // Down = - Y    
+
+        // East = + X 
+        // west = - X 
+
+        // South = + Z
+        // North = - Z
+        
+                                                                                      
 
         // Add x-axis arrow (red)
         const xAxis = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 2, 0xff0000); // x-axis (red)
@@ -307,55 +329,163 @@
         //  ██░░████████░░██ ██░░██████████ ██░░██████░░██ ██░░██████████ ██░░██  ██░░████ ██████████░░██ 
         //  ██░░░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░░░░░░░░░██ ██░░██  ██░░░░██ ██░░░░░░░░░░██ 
         //  ████████████████ ██████████████ ██████████████ ██████████████ ██████  ████████ ██████████████ 
-        //                                                                                                
-
+        //             
+        
+        // Function to create a checkerboard
         // Function to create a checkerboard
         function createCheckerboard(offsetX = 0, offsetY = 0, offsetZ = 0) {
             const cubeSize = 1; // size of each cube
             const boardSize = 20; // number of cubes along one axis
             const colors = [0xff0000, 0xffa500, 0xffff00, 0x008000, 0x0000ff, 0x800080]; // red, orange, yellow, green, blue, purple
+            const blocks = []; // Array to store all blocks
 
-            for (let i = 0; i < boardSize; i++) {
-                for (let j = 0; j < boardSize; j++) {
-                    let color;
-                    if ((i + j) % 2 === 0) {
-                        const colorIndex = ((i / 2) + (j / 2)) % colors.length;
-                        color = colors[colorIndex];
-                    } else {
-                        color = 0xffffff; // white
-                    }
+            for (let index = 0; index < boardSize * boardSize; index++) {
+                const i = Math.floor(index / boardSize);
+                const j = index % boardSize;
 
-                    const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-
-                    // Create a material array to only show the faces that are not connected
-                    const materials = [
-                        new THREE.MeshBasicMaterial({ color: color }), // Right face
-                        new THREE.MeshBasicMaterial({ color: color }), // Left face
-                        new THREE.MeshBasicMaterial({ color: color }), // Top face
-                        new THREE.MeshBasicMaterial({ color: color }), // Bottom face
-                        new THREE.MeshBasicMaterial({ color: color }), // Front face
-                        new THREE.MeshBasicMaterial({ color: color })  // Back face
-                    ];
-
-                    // Adjust which faces to show
-                    if (i > 0) materials[1] = new THREE.MeshBasicMaterial({ visible: false }); // Hide left face if there is a cube to the left
-                    if (i < boardSize - 1) materials[0] = new THREE.MeshBasicMaterial({ visible: false }); // Hide right face if there is a cube to the right
-                    if (j > 0) materials[5] = new THREE.MeshBasicMaterial({ visible: false }); // Hide back face if there is a cube behind
-                    if (j < boardSize - 1) materials[4] = new THREE.MeshBasicMaterial({ visible: false }); // Hide front face if there is a cube in front
-
-                    const block = new THREE.Mesh(geometry, materials);
-                    block.position.set(i - boardSize / 2 + offsetX, offsetY, j - boardSize / 2 + offsetZ);
-                    scene.add(block);
+                let color;
+                if ((i + j) % 2 === 0) {
+                    const colorIndex = ((i / 2) + (j / 2)) % colors.length;
+                    color = colors[colorIndex];
+                } else {
+                    color = 0xffffff; // white
                 }
+
+                const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                const materials = [
+                    new THREE.MeshBasicMaterial({ color: color }), // Right face
+                    new THREE.MeshBasicMaterial({ color: color }), // Left face
+                    new THREE.MeshBasicMaterial({ color: color }), // Top face
+                    new THREE.MeshBasicMaterial({ color: color }), // Bottom face (hidden)
+                    new THREE.MeshBasicMaterial({ color: color }), // Front face
+                    new THREE.MeshBasicMaterial({ color: color })  // Back face
+                ];
+
+                const block = new THREE.Mesh(geometry, materials);
+                block.position.set(i - boardSize / 2 + offsetX, offsetY, j - boardSize / 2 + offsetZ);
+                blocks.push(block); // Store block in array
             }
+
+            return blocks; // Return all blocks
         }
 
-        // Create the first checkerboard
-        createCheckerboard(0, -1, 0);
+        // Function to adjust visibility of block faces
+        function adjustFaceVisibility(blocks, boardSize) {
+            const positions = new Map();
+            blocks.forEach((block) => {
+                const { x, y, z } = block.position;
+                positions.set(`${x},${y},${z}`, block);
+            });
 
-        // Create the second checkerboard next to the original and 1 block higher
-        createCheckerboard(0, 0, -20);
-        createCheckerboard(0, 2, -40);
+            blocks.forEach((block) => {
+                const { x, y, z } = block.position;
+                const materials = block.material;
+
+                // Adjust face visibility based on adjacent blocks
+                if (positions.has(`${x+1},${y},${z}`)) materials[0].visible = false; // Right face
+                if (positions.has(`${x-1},${y},${z}`)) materials[1].visible = false; // Left face
+                if (positions.has(`${x},${y+1},${z}`)) materials[2].visible = false; // Top face
+                if (positions.has(`${x},${y-1},${z}`)) materials[3].visible = false; // Bottom face
+                if (positions.has(`${x},${y},${z+1}`)) materials[4].visible = false; // Front face
+                if (positions.has(`${x},${y},${z-1}`)) materials[5].visible = false; // Back face
+            });
+        }
+
+        // Create and store all blocks
+        let allBlocks = [];
+
+        allBlocks = allBlocks.concat(createCheckerboard(0, -1, 0)); // center center
+        allBlocks = allBlocks.concat(createCheckerboard(0, 0, -20)); // north center
+        allBlocks = allBlocks.concat(createCheckerboard(0, 2, -40)); // north north center
+        allBlocks = allBlocks.concat(createCheckerboard(-20, 0, 0)); // west center
+        allBlocks = allBlocks.concat(createCheckerboard(-40, -1, 0)); // west west center
+        allBlocks = allBlocks.concat(createCheckerboard(-40, 3, 0)); // west west center
+        allBlocks = allBlocks.concat(createCheckerboard(-40, 4, 0)); // west west center
+        allBlocks = allBlocks.concat(createCheckerboard(20, 5, 0)); // east center
+        allBlocks = allBlocks.concat(createCheckerboard(20, 4, 0)); // east center
+        allBlocks = allBlocks.concat(createCheckerboard(20, 3, 0)); // east center
+        allBlocks = allBlocks.concat(createCheckerboard(20, 2, 0)); // east center
+        allBlocks = allBlocks.concat(createCheckerboard(20, 1, 0)); // east center
+        allBlocks = allBlocks.concat(createCheckerboard(20, 0, 0)); // east center
+
+        // Adjust face visibility for all blocks
+        adjustFaceVisibility(allBlocks, 20, 0, 0, 0); // Adjust the offsets as needed
+
+        // Add all blocks to the scene at once
+        allBlocks.forEach(block => scene.add(block));
+
+
+
+        // Function to create a checkerboard
+        // function createCheckerboard(offsetX = 0, offsetY = 0, offsetZ = 0) {
+        //     const cubeSize = 1; // size of each cube
+        //     const boardSize = 20; // number of cubes along one axis
+        //     const colors = [0xff0000, 0xffa500, 0xffff00, 0x008000, 0x0000ff, 0x800080]; // red, orange, yellow, green, blue, purple
+        //     const blocks = []; // Array to store all blocks
+
+        //     for (let index = 0; index < boardSize * boardSize; index++) {
+        //         const i = Math.floor(index / boardSize);
+        //         const j = index % boardSize;
+
+        //         let color;
+        //         if ((i + j) % 2 === 0) {
+        //             const colorIndex = ((i / 2) + (j / 2)) % colors.length;
+        //             color = colors[colorIndex];
+        //         } else {
+        //             color = 0xffffff; // white
+        //         }
+
+        //         const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+        //         // Create a material array to only show the faces that are not connected
+        //         const materials = [
+        //             new THREE.MeshBasicMaterial({ color: color }), // Right face
+        //             new THREE.MeshBasicMaterial({ color: color }), // Left face
+        //             new THREE.MeshBasicMaterial({ color: color }), // Top face
+        //             new THREE.MeshBasicMaterial({ color: color }), // Bottom face (hidden)
+        //             new THREE.MeshBasicMaterial({ color: color }), // Front face
+        //             new THREE.MeshBasicMaterial({ color: color })  // Back face
+        //         ];
+
+        //         // Adjust which faces to show
+        //         if (i > 0) materials[1] = new THREE.MeshBasicMaterial({ visible: false }); // Hide left face if there is a cube to the left
+        //         if (i < boardSize - 1) materials[0] = new THREE.MeshBasicMaterial({ visible: false }); // Hide right face if there is a cube to the right
+        //         if (j > 0) materials[5] = new THREE.MeshBasicMaterial({ visible: false }); // Hide back face if there is a cube behind
+        //         if (j < boardSize - 1) materials[4] = new THREE.MeshBasicMaterial({ visible: false }); // Hide front face if there is a cube in front
+        //         // Top and bottom face visibility adjustment
+
+        //         const block = new THREE.Mesh(geometry, materials);
+        //         block.position.set(i - boardSize / 2 + offsetX, offsetY, j - boardSize / 2 + offsetZ);
+        //         scene.add(block);
+        //     }
+        // }
+
+
+        // // Create the first checkerboard (x, y, z)
+        // createCheckerboard(0, -1, 0); // center center
+
+        // createCheckerboard(0, 0, -20); // north center
+        // createCheckerboard(0, 2, -40); // north north center
+
+        // createCheckerboard(-20, 0, 0); // west center
+        // createCheckerboard(-40, -1, 0); // west west center
+        // createCheckerboard(-40, 3, 0); // west west center
+        // createCheckerboard(-40, 4, 0); // west west center
+
+        // createCheckerboard(20, 5, 0); // east center
+        // createCheckerboard(20, 4, 0); // east center
+        // createCheckerboard(20, 3, 0); // east center
+        // createCheckerboard(20, 2, 0); // east center
+        // createCheckerboard(20, 1, 0); // east center
+        // createCheckerboard(20, 0, 0); // east center
+
+        //[x][x][x]
+        //[x][x][x]
+        //[x][x][x]
+
+        //                  [x][x][x]
+        //         [x][x][x]
+        //[x][x][x]
 
         // ############################################################################################################
 
@@ -383,7 +513,7 @@
 
         let cameraAngle = Math.PI / 2; // Set initial camera angle to 90 degrees (Math.PI/2 radians)
         const cameraRotateSpeed = 0.2;
-        let cameraVerticalAngle = Math.PI / 4; // Set initial vertical camera angle (45 degrees)
+        let cameraVerticalAngle = Math.PI / 6; // Set initial vertical camera angle (30 degrees)
         const cameraVerticalRotateSpeed = 0.2;
 
         document.addEventListener('keydown', (event) => {
@@ -398,21 +528,68 @@
                 cube.velocityY = cube.jumpStrength;
                 cube.isJumping = true;
             }
-            // if (event.code === 'ArrowUp') {
-            //     cameraVerticalAngle += cameraVerticalRotateSpeed;
-            //     // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
-            //     cameraVerticalAngle = Math.min(Math.PI / 2 - 0.01, cameraVerticalAngle);
-            // }
-            // if (event.code === 'ArrowDown') {
-            //     cameraVerticalAngle -= cameraVerticalRotateSpeed;
-            //     // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
-            //     cameraVerticalAngle = Math.max(-Math.PI / 2 + 0.01, cameraVerticalAngle);
-            // }
+            if (event.code === 'ArrowUp') {
+                cameraVerticalAngle += cameraVerticalRotateSpeed;
+                // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
+                cameraVerticalAngle = Math.min(Math.PI / 2, cameraVerticalAngle);
+            }
+            if (event.code === 'ArrowDown') {
+                cameraVerticalAngle -= cameraVerticalRotateSpeed;
+                // Clamp cameraVerticalAngle to prevent it from going beyond certain limits
+                cameraVerticalAngle = Math.max(-Math.PI / 2, cameraVerticalAngle);
+            }
+            // Movement controls
+            if (event.code === 'KeyW') {
+                if (keyboard['KeyS']) {
+                    cube.velocityZ = 0;
+                } else {
+                    cube.velocityZ = -0.1;
+                }
+            }
+            if (event.code === 'KeyS') {
+                if (keyboard['KeyW']) {
+                    cube.velocityZ = 0;
+                } else {
+                    cube.velocityZ = 0.1;
+                }
+            }
+            if (event.code === 'KeyA') {
+                if (keyboard['KeyD']) {
+                    cube.velocityX = 0;
+                } else {
+                    cube.velocityX = -0.1;
+                }
+            }
+            if (event.code === 'KeyD') {
+                if (keyboard['KeyA']) {
+                    cube.velocityX = 0;
+                } else {
+                    cube.velocityX = 0.1;
+                }
+            }
         });
 
         // If user picks up a key, then correct the amount of pressed inputs
         document.addEventListener('keyup', (event) => {
             keyboard[event.code] = false;
+            // Reset velocities if keys are released
+            if (event.code === 'KeyW' || event.code === 'KeyS') {
+                cube.velocityZ = 0;
+                if (keyboard['KeyW']) {
+                    cube.velocityZ = -0.1;
+                } else if (keyboard['KeyS']) {
+                    cube.velocityZ = 0.1;
+                }
+            }
+
+            if (event.code === 'KeyA' || event.code === 'KeyD') {
+                cube.velocityX = 0;
+                if (keyboard['KeyA']) {
+                    cube.velocityX = -0.1;
+                } else if (keyboard['KeyD']) {
+                    cube.velocityX = 0.1;
+                }
+            }
         });
 
         // ############################################################################################################
@@ -501,11 +678,12 @@
             // THIS IS FOR THE FPS COUNTER
             // stats.begin();
 
+            // Collision detection with the blocks
+            let isOnBlock = false;
+
             // Get the camera's direction vector
             const cameraDirection = new THREE.Vector3();
             camera.getWorldDirection(cameraDirection);
-
-            // Zero out the vertical component
             cameraDirection.y = 0;
             cameraDirection.normalize();
 
@@ -513,16 +691,21 @@
             const cameraRight = new THREE.Vector3();
             cameraRight.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)).normalize();
 
-            // Move the cube
-            if (keyboard['KeyW']) cube.position.addScaledVector(cameraDirection, 0.1);
-            if (keyboard['KeyS']) cube.position.addScaledVector(cameraDirection, -0.1);
-            if (keyboard['KeyA']) cube.position.addScaledVector(cameraRight, -0.1);
-            if (keyboard['KeyD']) cube.position.addScaledVector(cameraRight, 0.1);
-            
-            // Update the status display
-            statusDiv.innerText = `Jumping: ${cube.isJumping ? 'Yes' : 'No'}`;
-            statusDiv.innerText += `\nCoordinates: (${cube.position.x.toFixed(2)}, ${cube.position.y.toFixed(2)}, ${cube.position.z.toFixed(2)})`;    
+            // Replace the movement logic in the animate function
+            if (keyboard['KeyW'] && canMoveNorth) {
+                cube.position.addScaledVector(cameraDirection, 0.1);
+            }
+            if (keyboard['KeyS'] && canMoveSouth) {
+                cube.position.addScaledVector(cameraDirection, -0.1);
+            }
+            if (keyboard['KeyA'] && canMoveWest) {
+                cube.position.addScaledVector(cameraRight, -0.1);
+            }
+            if (keyboard['KeyD'] && canMoveEast) {
+                cube.position.addScaledVector(cameraRight, 0.1);
+            }
 
+            
             // Update cube rotation
             updateCubeRotation();
 
@@ -538,54 +721,88 @@
                 camera.quaternion.set(0, 0, 0, 1); // Reset the rotation
             }
 
-            // ############################################################################################################       
-            // Jumping
-            // Apply gravity
-            if (cube.position.y > 0) {
-                cube.velocityY -= 0.01;
-            } 
-            // else {
-            //     cube.velocityY = 0;
-            //     cube.position.y = 0;
-            //     cube.isJumping = false; // Reset jumping state when on the ground
-            // }
-
             // Apply vertical velocity to simulate jumping and falling
             cube.position.y += cube.velocityY;
 
+            // Reset movement flags before checking collisions
+            canMoveNorth = true;
+            canMoveSouth = true;
+            canMoveEast = true;
+            canMoveWest = true;
 
-            // Collision detection with the blocks
-            let isOnBlock = false;
             scene.traverse(function(object) {
-                if (object.isMesh && object.geometry instanceof THREE.BoxGeometry && object !== cube) {
-                    const cubeBox = new THREE.Box3().setFromObject(cube);
-                    const objectBox = new THREE.Box3().setFromObject(object);
+            if (object.isMesh && object.geometry instanceof THREE.BoxGeometry && object !== cube) {
+                const cubeBox = new THREE.Box3().setFromObject(cube);
+                const objectBox = new THREE.Box3().setFromObject(object);
 
-                    if (cubeBox.intersectsBox(objectBox)) {
-                        const objectTop = objectBox.max.y;
-                        if (cube.position.y <= objectTop) {
-                            cube.position.y = objectTop;
-                            cube.velocityY = 0; // Ensure velocity is reset when hitting a block
-                            cube.isJumping = false; // Ensure jumping state is reset
-                            isOnBlock = true;
-                        }
+                if (cubeBox.intersectsBox(objectBox)) {
+                    const objectTop = objectBox.max.y;
+                    const objectBottom = objectBox.min.y;
+                    const objectLeft = objectBox.min.x;
+                    const objectRight = objectBox.max.x;
+                    const objectFront = objectBox.max.z;
+                    const objectBack = objectBox.min.z;
+
+                    const cubeTop = cube.position.y + cubeDimensions.height / 2;
+                    const cubeBottom = cube.position.y - cubeDimensions.height / 2;
+                    const cubeLeft = cube.position.x - cubeDimensions.width / 2;
+                    const cubeRight = cube.position.x + cubeDimensions.width / 2;
+                    const cubeFront = cube.position.z + cubeDimensions.depth / 2;
+                    const cubeBack = cube.position.z - cubeDimensions.depth / 2;
+
+                    // Check for bottom collision with grace
+                    if (cubeBottom < objectTop + 0.1 && cubeTop > objectTop && 
+                        cubeRight > objectLeft && cubeLeft < objectRight && 
+                        cubeFront > objectBack && cubeBack < objectFront) {
+                        cube.position.y = objectTop + cubeDimensions.height / 2;
+                        cube.velocityY = 0;
+                        cube.isJumping = false;
+                        isOnBlock = true;
+                    }
+
+                    // Check for top collision with grace
+                    if (cubeTop > objectBottom - 0.1 && cubeBottom < objectBottom &&
+                        cubeRight > objectLeft && cubeLeft < objectRight && 
+                        cubeFront > objectBack && cubeBack < objectFront) {
+                        cube.position.y = objectBottom - cubeDimensions.height / 2;
+                        cube.velocityY = 0;
+                    }
+
+                    // Check for north collision
+                    if (cubeBack < objectFront + 0.1 && cubeFront > objectFront &&
+                        cubeRight > objectLeft && cubeLeft < objectRight &&
+                        cubeTop > objectBottom && cubeBottom < objectTop) {
+                        canMoveNorth = false;
+                    }
+
+                    // Check for south collision
+                    if (cubeFront > objectBack - 0.1 && cubeBack < objectBack &&
+                        cubeRight > objectLeft && cubeLeft < objectRight &&
+                        cubeTop > objectBottom && cubeBottom < objectTop) {
+                        canMoveSouth = false;
+                    }
+
+                    // Check for west collision
+                    if (cubeLeft < objectRight + 0.1 && cubeRight > objectRight &&
+                        cubeFront > objectBack && cubeBack < objectFront &&
+                        cubeTop > objectBottom && cubeBottom < objectTop) {
+                        canMoveWest = false;
+                    }
+
+                    // Check for east collision
+                    if (cubeRight > objectLeft - 0.1 && cubeLeft < objectLeft &&
+                        cubeFront > objectBack && cubeBack < objectFront &&
+                        cubeTop > objectBottom && cubeBottom < objectTop) {
+                        canMoveEast = false;
                     }
                 }
-            });
-
-
+            }
+        });
 
             // If the cube is not on any block, continue falling
             if (!isOnBlock) {
                 cube.velocityY -= 0.01; // Continue falling
             }
-            // Collision detection with the surface
-            // if (cube.position.y <= 0) {
-            //     cube.position.y = 0;
-            //     cube.velocityY = 0; // Ensure velocity is reset when hitting the ground
-            //     cube.isJumping = false; // Ensure jumping state is reset
-            // }
-            // ############################################################################################################       
 
             // Update camera position to orbit around the cube
             const radius = 15;
@@ -604,6 +821,14 @@
 
             // THIS IS FOR THE FPS COUNTER
             // stats.end();
+            
+            // Update the status display
+            // remove the negative sign from any zero values for coordinates and velocity
+            statusDiv.innerText = `Jumping: ${cube.isJumping ? 'Yes' : 'No'}`;
+            statusDiv.innerText += `\nOn Block: ${isOnBlock ? 'Yes' : 'No'}`;
+            statusDiv.innerText += `\nCoordinates: (${(cube.position.x.toFixed(2) == '-0.00' ? '0.00' : cube.position.x.toFixed(2))}, ${(cube.position.y.toFixed(2) == '-0.00' ? '0.00' : cube.position.y.toFixed(2))}, ${(cube.position.z.toFixed(2) == '-0.00' ? '0.00' : cube.position.z.toFixed(2))})`;
+            statusDiv.innerText += `\nVelocity: (${(cube.velocityX.toFixed(2) == '-0.00' ? '0.00' : cube.velocityX.toFixed(2))}, ${(cube.velocityY.toFixed(2) == '-0.00' ? '0.00' : cube.velocityY.toFixed(2))}, ${(cube.velocityZ.toFixed(2) == '-0.00' ? '0.00' : cube.velocityZ.toFixed(2))})`;
+
 
             renderer.render(scene, camera);
         }
